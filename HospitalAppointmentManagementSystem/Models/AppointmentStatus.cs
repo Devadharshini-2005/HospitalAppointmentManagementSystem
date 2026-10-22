@@ -6,9 +6,9 @@ namespace HospitalAppointmentManagementSystem.Models
 {
     internal enum AppointmentStatus
     {
-            Scheduled,
-            Completed,
-            Cancelled
-        
+        Scheduled,
+        Completed,
+        Cancelled
+
     }
 }

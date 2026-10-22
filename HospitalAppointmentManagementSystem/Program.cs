@@ -1,13 +1,14 @@
 ﻿
 using HospitalAppointmentManagementSystem.Models;
 using HospitalAppointmentManagementSystem.Services;
+using System.Transactions;
 
 public class Program
 
 {
     public static void Main(string[] args)
     {
-
+        
 
         int option;
 
@@ -17,8 +18,9 @@ public class Program
             $"1.Patient Management\n" +
             $"2.Doctors Management\n" +
             $"3.Appointment Management\n" +
-            $"4.Save\n" +
-            $"5.Save and Exit");
+            $"4.Search and View Records\n" +
+            $"5.Reports\n" +
+            $"6.Exit");
 
             Console.WriteLine("Enter the option : ");
 
@@ -28,28 +30,46 @@ public class Program
             {
                 case 1:
                     {
-                        patientManagement();
+                        PatientManagement();
                         break;
                     }
                 case 2:
                     {
-                        doctorManagement();
+                        DoctorManagement();
                         break;
                     }
                 case 3:
                     {
-                        appointmentManagement();
+                        AppointmentManagement();
+                        break;
+                    }
+
+                case 4:
+                    {
+                        SearchAndViewReportMAngement();
+                        break;
+                    }
+                case 5:
+                    {
+                        ReportManagement();
+                        break;
+                    }
+                case 6:
+                    {
+                        Console.WriteLine("---------------------Exit------------------");
                         break;
                     }
             }
-        } while (option!=5);
+        } while (option!=6);
 
 
         
     }
-    static public void patientManagement()
+    static public void PatientManagement()
     {
         PatientsServices patientService = new PatientsServices();
+
+        patientService.LoadPatients();
 
         int option;
 
@@ -62,7 +82,7 @@ public class Program
             "4.Search by Patient Name\n" +
             "5.Update Patient by id\n" +
             "6.Delete Patient Records\n" +
-            "7.Exit");
+            "7.Save and Exit");
             Console.WriteLine("Enter the option : ");
 
             int.TryParse(Console.ReadLine(), out option);
@@ -123,6 +143,7 @@ public class Program
                     }
                 case 7:
                     {
+                        patientService.SavePatients();
                         Console.WriteLine("----------------Exit--------------------");
                         break;
                     }
@@ -132,10 +153,11 @@ public class Program
 
         }
 
-    static public void doctorManagement()
+    static public void DoctorManagement()
     {
         DoctorsService doctorsService = new DoctorsService();
 
+        doctorsService.LoadDoctors();
         int option;
 
         do
@@ -147,7 +169,7 @@ public class Program
             "4.Search\n" +
             "5.Update\n" +
             "6.Delete\n" +
-            "7.Exit");
+            "7.Save and Exit");
 
             int.TryParse(Console.ReadLine(), out option);
 
@@ -184,7 +206,7 @@ public class Program
                     {
                         Console.WriteLine("Enter the Name : ");
                         string? fullName = Console.ReadLine();
-                        doctorsService.SearchByName(fullName);
+                        doctorsService.SearchByName(fullName!);
                         break;
                     }
 
@@ -204,6 +226,7 @@ public class Program
 
                 case 7:
                     {
+                        doctorsService.SaveDoctors();
                         Console.WriteLine("------------------------------Exit-----------------------------");
                         break;
                     }
@@ -211,17 +234,234 @@ public class Program
         } while (option != 7);
     }
 
-    static public void appointmentManagement()
+    static public void AppointmentManagement()
     {
         int option;
+        PatientsServices patientsServices = new PatientsServices();
+        DoctorsService doctorsService = new DoctorsService();
+        AppointmentService appointmentService = new AppointmentService(patientsServices.GetPatientsList(),doctorsService.GetDoctorsList());
+
+        appointmentService.LoadAppointments();
 
         do
         {
             Console.WriteLine("--------Appointment Management---------\n" +
                 "1.Book Appointment\n" +
-                "2.ViewAllAppoint");
+                "2.View All Appointment\n" +
+                "3.Get By Id\n" +
+                "4.Reshecduled Appointment\n" +
+                "5.Cancel Appointment\n" +
+                "6.Mark as Completed\n" +
+                "7.Save and Exit");
+
+            Console.WriteLine("Enter the Option : ");
 
             int.TryParse(Console.ReadLine(),out option);
+
+            switch (option)
+            {
+                case 1:
+                    {
+                        Console.WriteLine("Enter Appointment Id : ");
+                        int.TryParse(Console.ReadLine(),out int appointmentId);
+                        Console.WriteLine("Enter Patient Id : ");
+                        int.TryParse(Console.ReadLine(),out int patientId);
+                        Console.WriteLine("Enter Doctor Id : ");
+                        int.TryParse(Console.ReadLine(),out int doctorId);
+                        Console.WriteLine("Enter Appointment DateTime : ");
+                        DateTime.TryParse(Console.ReadLine(),out DateTime appointmentdatetime);
+                        Console.WriteLine("Enter Reason : ");
+                        string? reason = Console.ReadLine();
+                        appointmentService.BookAppointment(appointmentId,patientId,doctorId,appointmentdatetime,reason!);
+                        break;
+                    }
+                case 2:
+                    {
+                        appointmentService.ViewAllAppointment();
+                        break;
+                    }
+
+                case 3:
+                    {
+                        Console.WriteLine("Enter Appointment Id : ");
+                        int.TryParse(Console.ReadLine(), out int appointmentId);
+                        appointmentService.GetById(appointmentId);
+                        break;
+                    }
+
+                case 4:
+                    {
+                        Console.WriteLine("Enter Appointment Id : ");
+                        int.TryParse(Console.ReadLine(), out int appointmentId);
+                        Console.WriteLine("Enter Appointment DateTime : ");
+                        DateTime.TryParse(Console.ReadLine(), out DateTime appointmentDateTime);
+                        appointmentService.ReshecduleAppointment(appointmentId,appointmentDateTime);
+                        break;
+                    }
+
+                case 5:
+                    {
+                        Console.WriteLine("Enter Appointment Id : ");
+                        int.TryParse(Console.ReadLine(), out int appointmentId);
+                        appointmentService.CancelAppointment(appointmentId);
+                        break;
+                    }
+
+                case 6:
+                    {
+                        Console.WriteLine("Enter Appointment Id : ");
+                        int.TryParse(Console.ReadLine(), out int appointmentId);
+                        appointmentService.MarkCompleted(appointmentId);
+                        break;
+                    }
+
+                case 7:
+                    {
+                        appointmentService.SaveAppointments();
+                        Console.WriteLine("------------------Exit----------------");
+                        break;
+                    }
+            }
+
         } while (option !=7);
+    }
+
+   static public void SearchAndViewReportMAngement()
+    {
+        int option;
+
+        PatientsServices patientsServices = new PatientsServices();
+        DoctorsService doctorsService = new DoctorsService();
+        AppointmentService appointmentService=new AppointmentService();
+
+        SearchAndReports searchAndReports = new SearchAndReports(patientsServices.GetPatientsList(),doctorsService.GetDoctorsList(),appointmentService.GetAppointmentList());
+
+        do
+        {
+            Console.WriteLine("------------Search and Reports------------\n" +
+                "1.List Appointment By Patient\n" +
+                "2.List Appointment By Doctor\n" +
+                "3.List Appointment By Date\n" +
+                "4.Filter By Status\n" +
+                "5.Each Doctor's Appointment Count\n" +
+                "6.Calculate Consultation Fee for Completed Appointment\n" +
+                "7.Doctor with most Completed Appointmnet\n" +
+                "8.Exit");
+
+            Console.WriteLine("Enter the Option : ");
+            int.TryParse(Console.ReadLine(),out option);
+
+            switch (option)
+            {
+                case 1:
+                    {
+                        Console.WriteLine("Enter Patient Id : ");
+                        int.TryParse(Console.ReadLine(), out int patientId);
+                        searchAndReports.ListByPatient(patientId);
+                        break;
+                    }
+                case 2:
+                    {
+                        Console.WriteLine("Enter Doctor Id : ");
+                        int.TryParse(Console.ReadLine(), out int doctorId);
+                        searchAndReports.ListByDoctor(doctorId);
+                        break;
+                    }
+                case 3:
+                    {
+                        Console.WriteLine("Enter Appointment DateTime (YYYY-MM-DD) : ");
+                        DateTime.TryParse(Console.ReadLine(), out DateTime appointmentDateTime);
+                        searchAndReports.ListByDatetime(appointmentDateTime);
+                        break;
+                    }
+                case 4:
+                    {
+                        searchAndReports.FilterByStauts();
+                        break;
+                    }
+                case 5:
+                    {
+                        searchAndReports.ShecduledAppointmentByDoctor();
+                        break;
+                    }
+                case 6:
+                    {
+                        searchAndReports.CalulateConsultationFee();
+                        break;
+                    }
+                case 7:
+                    {
+                        searchAndReports.DoctorMostCompletedAppointment();
+                        break;
+                    }
+                case 8:
+                    {
+                        Console.WriteLine("------------------------Exit---------------------------");
+                        break;
+                    }
+            }
+        } while (option!=8);
+    }
+
+    static public void ReportManagement()
+    {
+        int option;
+
+        PatientsServices patientsServices = new PatientsServices();
+        DoctorsService doctorsService = new DoctorsService();
+        AppointmentService appointmentService = new AppointmentService();
+
+        ReportsServices reports = new ReportsServices(patientsServices.GetPatientsList(), doctorsService.GetDoctorsList(), appointmentService.GetAppointmentList());
+
+        do
+        {
+
+            Console.WriteLine("----------Report Mangement------------\n" +
+                "1.Apointment By Date and Staus\n" +
+                "2.Doctor-wise scheduled and completed appointment counts\n" +
+                "3.Completed consultation revenue.\n" +
+                "4.Appointments for a selected patient or doctor\n" +
+                "5.Exit");
+
+            Console.WriteLine("Enter the option : ");
+
+            int.TryParse(Console.ReadLine(), out option);
+
+            switch (option)
+            {
+                case 1:
+                    {
+                        Console.WriteLine("Enter the DateTime : ");
+                        DateTime.TryParse(Console.ReadLine(),out DateTime appointmentDateTime);
+                        Console.WriteLine("Enter the Status");
+                        string? input = Console.ReadLine();
+                        Enum.TryParse<AppointmentStatus>(input,true,out AppointmentStatus status);
+                        reports.AppointmentsByStatusAndDatetime(status,appointmentDateTime);
+                        break;
+                    }
+                case 2:
+                    {
+                        reports.ShecduledAndCompletedAppointments();
+                        break;
+                    }
+                case 3:
+                    {
+                        reports.CompletedXConsultationRevenue();
+                        break;
+                    }
+                case 4:
+                    {
+                        reports.AppointmemtsForPatientOrDoctors();
+                        break;
+                    }
+                case 5:
+                    {
+                        Console.WriteLine("----------------------Exit---------------------");
+                        break;
+                    }
+            }
+
+
+        } while (option != 5);
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 
 namespace HospitalAppointmentManagementSystem.Services
 {
@@ -11,7 +12,38 @@ namespace HospitalAppointmentManagementSystem.Services
         
         public PatientsServices() { }
 
-        AppointmentService appointment = new AppointmentService(patients);
+        public string? filePath = Path.Combine(AppContext.BaseDirectory, "DataFiles","patients.json");
+
+        public void LoadPatients()
+        {
+            string? folder = Path.GetDirectoryName(filePath);
+
+                Directory.CreateDirectory(folder!);
+
+            if (File.Exists(filePath))
+            {
+                string json = File.ReadAllText(filePath);
+
+                patients = JsonSerializer.Deserialize<List<Patients>>(json) ?? new List<Patients>();
+
+            }
+            else
+            {
+                patients = new List<Patients>();
+                SavePatients();
+            }
+
+            Console.WriteLine("Loaded Successfully!!");
+        }
+
+        public void SavePatients()
+        {
+            string json =JsonSerializer.Serialize(patients,new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(filePath!,json);
+
+            Console.WriteLine("Saved Successfully!!");
+        }
+
 
         public void Register(int patientId, string patientName, int patientAge, string patientPhoneNo)
         {
@@ -24,6 +56,8 @@ namespace HospitalAppointmentManagementSystem.Services
             }
 
             patients.Add(patient);
+
+            SavePatients();
             Console.WriteLine("Patient is Added Successfully......");
            
         }
@@ -63,7 +97,7 @@ namespace HospitalAppointmentManagementSystem.Services
 
         public void SearchByPatientName(string patientName)
         {
-            var patient = patients.Where(p => p.PatientName.ToLower().Contains(patientName.ToLower())).Select(p => p);
+            var patient = patients.Where(p => p.PatientName!.ToLower().Contains(patientName.ToLower())).Select(p => p);
 
             foreach (var i in patient)
             {
@@ -97,6 +131,11 @@ namespace HospitalAppointmentManagementSystem.Services
 
             Console.WriteLine("Updated Successfully!!");
 
+        }
+
+        public List<Patients> GetPatientsList()
+        {
+            return patients;
         }
 
     }
