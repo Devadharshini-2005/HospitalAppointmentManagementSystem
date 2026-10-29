@@ -94,7 +94,7 @@ namespace HospitalAppointmentManagementSystem.Services
 
         public void GetById(int appointmentId)
         {
-            if(appointments!.Any(a => a.AppointmentId == appointmentId))
+            if(!appointments!.Any(a => a.AppointmentId == appointmentId))
             {
                 Console.WriteLine("Appointment Not Found!!!");
                 return;

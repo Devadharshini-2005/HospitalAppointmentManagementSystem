@@ -21,7 +21,7 @@ namespace HospitalAppointmentManagementSystem.Services
 
         public void AppointmentsByStatusAndDatetime(AppointmentStatus status,DateTime appointmentDateTime)
         {
-            if (appointments!.Any(p => p.Status == status && p.AppointmentDateTime == appointmentDateTime))
+            if (!appointments!.Any(p => p.Status == status && p.AppointmentDateTime == appointmentDateTime))
             {
                 Console.WriteLine("Appointment is Not Exist!!");
                 return;
@@ -41,7 +41,7 @@ namespace HospitalAppointmentManagementSystem.Services
 
         public void ShecduledAndCompletedAppointments()
         {
-            var appointment = appointments!.Where(a => a.Status == AppointmentStatus.Scheduled && a.Status == AppointmentStatus.Completed);
+            var appointment = appointments!.Where(a => a.Status == AppointmentStatus.Scheduled && a.Status == AppointmentStatus.Completed).ToList();
 
             var groupbyDoctors = doctors!.GroupJoin(
                 appointment!,
@@ -55,13 +55,13 @@ namespace HospitalAppointmentManagementSystem.Services
                     shecduledCount = Matches.Where(m => m.Status == AppointmentStatus.Scheduled).Count(),
                     completedCount = Matches.Where(m => m.Status == AppointmentStatus.Completed).Count()
                 }
-                );
+                ).ToList();
 
             foreach (var k in groupbyDoctors)
             {
                 Console.WriteLine($"Doctor Id : {k.doctorId}  " +
                     $"Doctor Name : {k.doctorName}  " +
-                    $"Appointment Count : {k.specilization}  " +
+                    $"Specilization : {k.specilization}  " +
                     $"Shecduled Count : {k.shecduledCount}  " +
                     $"Completed Count : {k.completedCount}");
             }
@@ -70,12 +70,12 @@ namespace HospitalAppointmentManagementSystem.Services
 
         public void CompletedXConsultationRevenue()
         {
-            if (appointments!.Any(a => a.Status == AppointmentStatus.Completed))
+            if (!appointments!.Any(a => a.Status == AppointmentStatus.Completed))
             {
                 Console.WriteLine("Appointment Not Exist!!");
                 return;
             }
-            var appointment = appointments!.Where(a => a.Status == AppointmentStatus.Completed);
+            var appointment = appointments!.Where(a => a.Status == AppointmentStatus.Completed).ToList();
 
             var totalFee = doctors!.LeftJoin(
 
@@ -86,7 +86,7 @@ namespace HospitalAppointmentManagementSystem.Services
                 {
                     consultationFee = d.ConsultationFee
                 }
-                );
+                ).ToList();
 
             decimal consultationFee = 0;
             foreach (var r in totalFee)
@@ -112,7 +112,7 @@ namespace HospitalAppointmentManagementSystem.Services
                         Console.WriteLine("Enter Patient Id :");
                         int.TryParse(Console.ReadLine(), out int patientId);
 
-                        if (patients!.Any(p => p.PatientId == patientId))
+                        if (!patients!.Any(p => p.PatientId == patientId))
                         {
                             Console.WriteLine("Patient is Not Exist!!");
                             return;
@@ -135,7 +135,7 @@ namespace HospitalAppointmentManagementSystem.Services
                         Console.WriteLine("Enter Doctor Id :");
                         int.TryParse(Console.ReadLine(), out int doctorId);
 
-                        if (doctors!.Any(p => p.DoctorId == doctorId))
+                        if (!doctors!.Any(p => p.DoctorId == doctorId))
                         {
                             Console.WriteLine("Doctor is Not Exist!!");
                             return;

@@ -8,6 +8,7 @@ namespace HospitalAppointmentManagementSystem.Services
     internal class SearchAndReports
     {
 
+
         List<Patients>? patients = new List<Patients>();
         List<Doctors>? doctors = new List<Doctors>();
         List<Appointment>? appointments = new List<Appointment>();
@@ -28,12 +29,14 @@ namespace HospitalAppointmentManagementSystem.Services
 
         public void ListByPatient(int patientId)
         {
-            if(patients!.Any(p => p.PatientId == patientId))
+
+            if(!patients!.Any(p => p.PatientId == patientId))
             {
                 Console.WriteLine("Patient is Not Exist!!");
                 return;
             }
-            var appointment = appointments!.Where(p => p.PatientId==patientId);
+
+            var appointment = appointments!.Where(a => a.PatientId == patientId).ToList(); 
 
             foreach (var k in appointment)
             {
@@ -42,19 +45,34 @@ namespace HospitalAppointmentManagementSystem.Services
                     $"Doctor Id : {k.DoctorId}\n" +
                     $"Appointment DateTime : {k.AppointmentDateTime}\n" +
                     $"Reason : {k.Reason}\n" +
-                    $"Status : {k.Status}");
+                    $"Status : {k.Status}" );
             }
+
+
+            if (!appointment!.Any())
+            {
+                Console.WriteLine("Patient is Not Exist in the Appointment List!!");
+                return;
+            }
+
         }
 
         public void ListByDoctor(int doctorId)
         {
 
-            if (doctors!.Any(p => p.DoctorId == doctorId))
+            if (!doctors!.Any(p => p.DoctorId == doctorId))
             {
                 Console.WriteLine("Doctor is Not Exist!!");
                 return;
             }
-            var appointment = appointments!.Where(p => p.DoctorId == doctorId);
+
+            if (!appointments!.Any(p => p.DoctorId == doctorId))
+            {
+                Console.WriteLine("Doctor is Not Exist in the Appointment List!!");
+                return;
+            }
+
+            var appointment = appointments!.Where(a => a.DoctorId == doctorId).ToList();
 
             foreach (var k in appointment)
             {
@@ -71,12 +89,12 @@ namespace HospitalAppointmentManagementSystem.Services
 
         public void ListByDatetime(DateTime appointmentDateTime)
         {
-            if (appointments!.Any(p => p.AppointmentDateTime == appointmentDateTime))
+            if (!appointments!.Any(p => p.AppointmentDateTime == appointmentDateTime))
             {
                 Console.WriteLine("Appointment DateTime is Not Exist!!");
                 return;
             }
-            var appointment = appointments!.Where(p => p.AppointmentDateTime == appointmentDateTime);
+            var appointment = appointments!.Where(a => a.AppointmentDateTime == appointmentDateTime).ToList();
 
             foreach (var k in appointment)
             {
@@ -87,11 +105,12 @@ namespace HospitalAppointmentManagementSystem.Services
                     $"Reason : {k.Reason}\n" +
                     $"Status : {k.Status}");
             }
+
         }
 
         public void FilterByStauts()
         {
-            var appointment = appointments!.GroupBy(a => a.Status).Select(a => a);
+            var appointment = appointments!.GroupBy(a => a.Status).ToList();
 
             foreach (var j in appointment)
             {
@@ -119,7 +138,7 @@ namespace HospitalAppointmentManagementSystem.Services
                     doctorName = d.FullName,
                     count = Matches.Count()
                 }
-                );
+                ).ToList();
 
             foreach(var k in groupbyDoctors)
             {
@@ -131,12 +150,12 @@ namespace HospitalAppointmentManagementSystem.Services
         }
         public void CalulateConsultationFee()
         {
-            if (appointments!.Any(p => p.Status == AppointmentStatus.Completed))
+            if (!appointments!.Any(p => p.Status == AppointmentStatus.Completed))
             {
                 Console.WriteLine("Completed Appointment is Not Exist!!");
                 return;
             }
-            var appointment = appointments!.Where(a => a.Status == AppointmentStatus.Completed).Select(a => a);
+            var appointment = appointments!.Where(a => a.Status == AppointmentStatus.Completed).ToList();
             var totalFee= doctors!.LeftJoin(
                 
                 appointment,
@@ -159,12 +178,12 @@ namespace HospitalAppointmentManagementSystem.Services
 
         public void DoctorMostCompletedAppointment()
         {
-            if (appointments!.Any(p => p.Status == AppointmentStatus.Completed))
+            if (!appointments!.Any(p => p.Status == AppointmentStatus.Completed))
             {
                 Console.WriteLine("Completed Appointment is Not Exist!!");
                 return;
             }
-            var appointment = appointments!.Where(a => a.Status == AppointmentStatus.Completed);
+            var appointment = appointments!.Where(a => a.Status == AppointmentStatus.Completed).ToList();
 
             var groupbyDoctors = doctors!.GroupJoin(
                 appointment!,
@@ -176,7 +195,7 @@ namespace HospitalAppointmentManagementSystem.Services
                     doctorName = d.FullName,
                     count = Matches.Count()
                 }
-                );
+                ).ToList();
             int max = 0;
             int doctorId=0;
             string? doctorName="";

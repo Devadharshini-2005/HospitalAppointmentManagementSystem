@@ -334,6 +334,10 @@ public class Program
         DoctorsService doctorsService = new DoctorsService();
         AppointmentService appointmentService=new AppointmentService();
 
+        patientsServices.LoadPatients();
+        doctorsService.LoadDoctors();
+        appointmentService.LoadAppointments();
+
         SearchAndReports searchAndReports = new SearchAndReports(patientsServices.GetPatientsList(),doctorsService.GetDoctorsList(),appointmentService.GetAppointmentList());
 
         do
@@ -410,6 +414,10 @@ public class Program
         PatientsServices patientsServices = new PatientsServices();
         DoctorsService doctorsService = new DoctorsService();
         AppointmentService appointmentService = new AppointmentService();
+
+        patientsServices.LoadPatients();
+        doctorsService.LoadDoctors();
+        appointmentService.LoadAppointments();
 
         ReportsServices reports = new ReportsServices(patientsServices.GetPatientsList(), doctorsService.GetDoctorsList(), appointmentService.GetAppointmentList());
 
